@@ -1,0 +1,8 @@
+.card.old-dev{
+    border: 2px solid red;
+    filter: grayscale(100%) brightness(80%);
+}
+
+.card.young-dev{
+    border: 2px solid green;
+}
