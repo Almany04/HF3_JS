@@ -1,42 +1,38 @@
-const BASE_URL = "https://api.siposm.hu/";
+// JS/apiHandler.js
+const BASE_URL = "https://api.siposm.hu";
 
 export default class APIHandler {
-
-  // READ (Fejlesztők listázása)
   static async getAllDevelopers() {
-    const response = await fetch(BASE_URL + "getDevelopers");
-    return await response.json();
+    const res = await fetch(`${BASE_URL}/getDevelopers`);
+    if (!res.ok) throw new Error("GET /getDevelopers failed");
+    return res.json();
   }
 
-  // CREATE (Új fejlesztő létrehozása)
-  static async createDeveloper(developerObj) {
-    const response = await fetch(BASE_URL + "createDeveloper", {
+  static async createDeveloper(devObj) {
+    const res = await fetch(`${BASE_URL}/createDeveloper`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(developerObj)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(devObj),
     });
-    return await response.json();
+    if (!res.ok) throw new Error("POST /createDeveloper failed");
+    return res.json();
   }
 
-  // UPDATE (Fejlesztő frissítése)
   static async updateDeveloper(id, updateObj) {
-    const response = await fetch(BASE_URL + "updateDeveloper/" + id, {
+    const res = await fetch(`${BASE_URL}/updateDeveloper/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(updateObj)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateObj),
     });
-    return await response.json();
+    if (!res.ok) throw new Error("PUT /updateDeveloper/{id} failed");
+    return res.json();
   }
 
-  // DELETE (Fejlesztő törlése)
   static async deleteDeveloper(id) {
-    const response = await fetch(BASE_URL + "deleteDeveloper/" + id, {
-      method: "DELETE"
+    const res = await fetch(`${BASE_URL}/deleteDeveloper/${id}`, {
+      method: "DELETE",
     });
-    return await response.json();
+    if (!res.ok) throw new Error("DELETE /deleteDeveloper/{id} failed");
+    return res.json();
   }
 }

@@ -1,66 +1,104 @@
-import APIHandler from "./apiHandler.js";
+// JS/main.js
 import Renderer from "./renderer.js";
+import Logic from "./logic.js";
+
+const logic = new Logic();
+
+function render() {
+  Renderer.renderDevelopers(logic.filteredDevelopers, "app");
+  attachCardEvents();
+}
+
+function attachCardEvents() {
+  // Update gomb kártyán → form kitöltése
+  document.querySelectorAll(".update-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const dev = logic.filteredDevelopers.find(d => d.id == id || d._id == id);
+      if (!dev) return;
+
+      document.getElementById("editId").value = dev.id || dev._id || "";
+      document.getElementById("editName").value = dev.name || "";
+      document.getElementById("editEmail").value = dev.email || "";
+      document.getElementById("editJob").value = dev.job || "";
+      document.getElementById("editAge").value = dev.age ?? "";
+      document.getElementById("editSalary").value = dev.salary ?? "";
+      document.getElementById("editImage").value = dev.image || "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  // Delete
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      await logic.deleteDeveloper(id);
+      render();
+    });
+  });
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("Oldal betöltve!");
-
-  let developers = [];
-
-  try {
-    developers = await APIHandler.getAllDevelopers();
-    console.log("Fejlesztők lekérve:", developers);
-    Renderer.renderDevelopers(developers, "app");
-  } catch (error) {
-    console.error("Hiba történt az adatok lekérésekor:", error);
+  // Auth guard
+  const userStr = localStorage.getItem("loggedInUser");
+  if (!userStr) {
+    window.location.href = "index.html";
+    return;
   }
+  const user = JSON.parse(userStr);
+  logic.setLoggedUser(user);
+  document.getElementById("welcomeUser").textContent = `Belépve: ${user.username}`;
 
-  // 🔴 DELETE funkció
-  document.getElementById("app").addEventListener("click", async (event) => {
-    if (event.target.classList.contains("delete-btn")) {
-      const id = event.target.getAttribute("data-id");
-      console.log("Törlendő fejlesztő ID:", id);
-      try {
-        await APIHandler.deleteDeveloper(id);
-        developers = developers.filter(dev => dev.id != id);
-        Renderer.renderDevelopers(developers, "app");
-      } catch (error) {
-        console.log("Hiba történt törlés közben:", error);
-      }
-    }
+  // Szűrés UI
+  const filterSel = document.getElementById("jobFilter");
+  const resetBtn = document.getElementById("resetFilterBtn");
+  filterSel.addEventListener("change", () => {
+    logic.setFilter(filterSel.value);
+    render();
+  });
+  resetBtn.addEventListener("click", () => {
+    filterSel.value = "";
+    logic.setFilter("");
+    render();
   });
 
-  // 🟢 CREATE funkció
+  // Create
   document.getElementById("createBtn").addEventListener("click", async () => {
-    const raw = document.getElementById("newDevJson").value.trim();
-    if (!raw) {
-      alert("Adj meg JSON-t a textarea-ban!");
-      return;
-    }
-
-    let newDev;
+    const raw = document.getElementById("newDevJson").value;
     try {
-      newDev = JSON.parse(raw);
-    } catch (err) {
-      alert("❌ Hibás JSON: " + err.message);
-      console.error("JSON parse error:", raw);
-      return;
-    }
-
-    // automatikus prefix
-    if (typeof newDev.name === "string" && !newDev.name.startsWith("BD-")) {
-      newDev.name = "BD-" + newDev.name;
-    }
-
-    try {
-      const created = await APIHandler.createDeveloper(newDev);
-      console.log("Létrehozott fejlesztő:", created);
-
-      developers.push(created);
-      Renderer.renderDevelopers(developers, "app");
+      await logic.createDeveloperFromJSON(raw);
       document.getElementById("newDevJson").value = "";
-    } catch (error) {
-      alert("❌ Hiba a létrehozáskor (API): nézd meg a Console-t!");
-      console.error(error);
+      render();
+    } catch (e) {
+      alert(e.message || "Hiba a létrehozás során");
     }
   });
+
+  // Update
+  document.getElementById("updateBtn").addEventListener("click", async () => {
+    const id = document.getElementById("editId").value;
+    if (!id) return;
+
+    const updateObj = {
+      name: document.getElementById("editName").value,
+      email: document.getElementById("editEmail").value,
+      job: document.getElementById("editJob").value,
+      age: Number(document.getElementById("editAge").value),
+      salary: Number(document.getElementById("editSalary").value),
+      image: document.getElementById("editImage").value,
+    };
+
+    await logic.updateDeveloper(id, updateObj);
+    render();
+  });
+
+  // Logout
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "index.html";
+  });
+
+  // Adatok betöltése és első render
+  await logic.loadDevelopers();
+  render();
 });

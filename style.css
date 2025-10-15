@@ -1,8 +1,21 @@
-.card.old-dev{
-    border: 2px solid red;
-    filter: grayscale(100%) brightness(80%);
+/* Kártya keretek életkor alapján */
+.old-dev {
+  border: 2px solid #dc3545 !important; /* piros keret */
+}
+.old-dev .card-img-top {
+  filter: grayscale(100%) brightness(90%); /* elhalványított, fekete-fehér */
 }
 
-.card.young-dev{
-    border: 2px solid green;
+.young-dev {
+  border: 2px solid #198754 !important; /* zöld keret */
+}
+
+/* Kártya szélesség harmonizáció */
+.card {
+  width: 18rem;
+}
+
+/* GDPR banner vizuális kiemelés */
+#gdprBanner {
+  z-index: 1050;
 }
