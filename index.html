@@ -9,12 +9,16 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <script type="module" src="js/main.js" defer></script>
+    <script type="module" src="JS/main.js" defer></script>
 </head>
 <body class="bg-light">
     <div class="container py-4">
         <h1 class="text-center mb-4">Fejlesztői adatkezelő</h1>
-
+            <div class="mb-4 p-3 border rounded bg-light">
+             <h4 class="mb-3">Új fejlesztő hozzáadása</h4>
+             <textarea id="newDevJson" class="form-control mb-2" rows="4" placeholder='{"name":"AB-John Doe","email":"john@doe.com","job":"Frontend Developer","age":28,"salary":4000,"image":"https://picsum.photos/200"}'></textarea>
+            <button id="createBtn" class="btn btn-success">Create Developer</button>
+    </div>
         <div id="app"></div>
     </div>
 </body>

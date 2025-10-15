@@ -1,4 +1,4 @@
-import  Developer from ".developer.js";
+import  Developer from "./developer.js";
 
 export default class Renderer{
 
