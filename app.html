@@ -1,3 +1,4 @@
+<!-- ======================= app.html ======================= -->
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -23,20 +24,39 @@
 
     <!-- Szűrés -->
     <div class="mb-4 p-3 border rounded bg-light">
-      <h4 class="mb-3">Szűrés munkakör szerint</h4>
-      <div class="row g-2">
-        <div class="col-md-6">
-          <select id="jobFilter" class="form-select">
-            <option value="">Összes</option>
-            <option value="Frontend Developer">Frontend Developer</option>
-            <option value="Backend Developer">Backend Developer</option>
-            <option value="Fullstack Developer">Fullstack Developer</option>
-            <option value="DevOps Engineer">DevOps Engineer</option>
-            <option value="QA Engineer">QA Engineer</option>
-          </select>
+      <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+        <div>
+          <h4 class="mb-3">Szűrés munkakör szerint</h4>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <select id="jobFilter" class="form-select">
+                <option value="">Összes</option>
+                <option value="Frontend Developer">Frontend Developer</option>
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="Fullstack Developer">Fullstack Developer</option>
+                <option value="DevOps Engineer">DevOps Engineer</option>
+                <option value="QA Engineer">QA Engineer</option>
+                <option value="UI/UX Designer">UI/UX Designer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="Security Analyst">Security Analyst</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                <option value="Architect">Architect</option>
+                <option value="Cloud Solutions Architect">Cloud Solutions Architect</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <button id="resetFilterBtn" class="btn btn-outline-primary">Reset</button>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <button id="resetFilterBtn" class="btn btn-outline-primary">Reset</button>
+
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="showInvalid">
+          <label class="form-check-label" for="showInvalid">
+            Mutasd az érvénytelen (ID nélküli) rekordokat
+          </label>
+          <span id="invalidCount" class="badge bg-secondary ms-2">0</span>
         </div>
       </div>
     </div>
@@ -45,9 +65,12 @@
     <div class="mb-4 p-3 border rounded bg-light">
       <h4 class="mb-3">Új fejlesztő hozzáadása</h4>
       <textarea id="newDevJson" class="form-control mb-2" rows="4"
-        placeholder='{"name":"John Doe","email":"john@doe.com","job":"Frontend Developer","age":28,"salary":4000,"image":"https://picsum.photos/200"}'></textarea>
+        placeholder='{"name":"John Doe","email":"john@doe.com","job":"Frontend Developer","age":28,"salary":4000,"image":"https://picsum.photos/200","skills":["JS","HTML","CSS"]}'></textarea>
       <button id="createBtn" class="btn btn-success">Create Developer</button>
-      <div class="form-text mt-2">A név automatikusan prefixet kap a bejelentkezett felhasználó kezdőbetűiből (pl. BJ-John Doe).</div>
+      <div class="form-text mt-2">
+        A név automatikusan prefixet kap a bejelentkezett felhasználó kezdőbetűiből (pl. BJ-John Doe).
+        Létrehozáskor kliensoldali UUID is generálódik (id), így a rekord frissíthető és törölhető lesz.
+      </div>
     </div>
 
     <!-- UPDATE FORM -->

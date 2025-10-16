@@ -1,4 +1,4 @@
-// JS/gdpr.js
+// ======================= JS/gdpr.js =======================
 function getConsent() {
   return localStorage.getItem("gdprConsent"); // "accepted" | "declined" | null
 }
@@ -9,6 +9,8 @@ function setConsent(val) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const banner = document.getElementById("gdprBanner");
+  if (!banner) return; // index.html-en nincs banner
+
   const accept = document.getElementById("gdprAccept");
   const decline = document.getElementById("gdprDecline");
 

@@ -1,5 +1,4 @@
-// JS/auth.js
-
+// ======================= JS/auth.js =======================
 function getUsers() {
   return JSON.parse(localStorage.getItem("users") || "[]");
 }

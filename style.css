@@ -1,21 +1,37 @@
+/* ======================= style.css (kiegészítés) ======================= */
+
 /* Kártya keretek életkor alapján */
 .old-dev {
-  border: 2px solid #dc3545 !important; /* piros keret */
+  border: 2px solid #dc3545 !important;
 }
 .old-dev .card-img-top {
-  filter: grayscale(100%) brightness(90%); /* elhalványított, fekete-fehér */
+  filter: grayscale(100%) brightness(90%);
 }
-
 .young-dev {
-  border: 2px solid #198754 !important; /* zöld keret */
+  border: 2px solid #198754 !important;
 }
 
-/* Kártya szélesség harmonizáció */
+/* Kártya szélesség és kép viselkedés */
 .card {
   width: 18rem;
 }
+.card-img-top {
+  display: block;
+  object-fit: cover;
+}
 
 /* GDPR banner vizuális kiemelés */
-#gdprBanner {
-  z-index: 1050;
+#gdprBanner { z-index: 1050; }
+
+/* ID sor: ne csússzon szét, törjön kulturáltan */
+.id-line {
+  line-height: 1.2;
+  word-break: break-all;     /* hosszú UUID szépen törik */
+  white-space: normal;
+  user-select: text;
+  margin-top: .25rem;
+}
+.id-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: .8rem;
 }
