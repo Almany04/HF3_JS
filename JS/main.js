@@ -1,4 +1,3 @@
-// ======================= JS/main.js =======================
 import Renderer from "./renderer.js";
 import Logic from "./logic.js";
 
@@ -6,13 +5,21 @@ const logic = new Logic();
 
 function render() {
   Renderer.renderDevelopers(logic.filteredDevelopers, "app");
-  // NINCS szükség újra esemény-kötésre, delegálunk az #app konténerre
   const ic = document.getElementById("invalidCount");
   if (ic) ic.textContent = String(logic.invalidCount);
 }
 
+function clearEditForm() {
+    document.getElementById("editId").value = "";
+    document.getElementById("editName").value = "";
+    document.getElementById("editEmail").value = "";
+    document.getElementById("editJob").value = "";
+    document.getElementById("editAge").value = "";
+    document.getElementById("editSalary").value = "";
+    document.getElementById("editImage").value = "";
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  // Auth guard
   const userStr = localStorage.getItem("loggedInUser");
   if (!userStr) {
     window.location.href = "index.html";
@@ -22,27 +29,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   logic.setLoggedUser(user);
   document.getElementById("welcomeUser").textContent = `Belépve: ${user.username}`;
 
-  // Szűrés UI
   const filterSel = document.getElementById("jobFilter");
-  const resetBtn = document.getElementById("resetFilterBtn");
   filterSel?.addEventListener("change", () => {
     logic.setFilter(filterSel.value);
     render();
   });
-  resetBtn?.addEventListener("click", () => {
+  document.getElementById("resetFilterBtn")?.addEventListener("click", () => {
     filterSel.value = "";
     logic.setFilter("");
     render();
   });
 
-  // Mutasd az érvényteleneket
-  const showInvalid = document.getElementById("showInvalid");
-  showInvalid?.addEventListener("change", () => {
-    logic.setShowInvalid(showInvalid.checked);
+  document.getElementById("showInvalid")?.addEventListener("change", (e) => {
+    logic.setShowInvalid(e.target.checked);
     render();
   });
 
-  // Create
   document.getElementById("createBtn").addEventListener("click", async () => {
     const raw = document.getElementById("newDevJson").value;
     try {
@@ -50,43 +52,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("newDevJson").value = "";
       render();
     } catch (e) {
-      alert(e.message || "Hiba a létrehozás során");
+      alert(e.message || "Hiba a létrehozás során.");
     }
   });
 
-  // Update form gomb
   document.getElementById("updateBtn").addEventListener("click", async () => {
     const id = document.getElementById("editId").value.trim();
-    if (!id) {
-      alert("Nincs érvényes ID – ezt a rekordot nem lehet frissíteni.");
-      return;
+    if (!id) return;
+    
+    try {
+      const updateObj = {
+        name: document.getElementById("editName").value,
+        email: document.getElementById("editEmail").value,
+        job: document.getElementById("editJob").value,
+        age: Number(document.getElementById("editAge").value),
+        salary: Number(document.getElementById("editSalary").value),
+        image: document.getElementById("editImage").value,
+      };
+      await logic.updateDeveloper(id, updateObj);
+      clearEditForm();
+      render();
+    } catch (e) {
+      alert(e.message || "Hiba a frissítés során.");
     }
-
-    const updateObj = {
-      name: document.getElementById("editName").value,
-      email: document.getElementById("editEmail").value,
-      job: document.getElementById("editJob").value,
-      age: Number(document.getElementById("editAge").value),
-      salary: Number(document.getElementById("editSalary").value),
-      image: document.getElementById("editImage").value,
-    };
-
-    await logic.updateDeveloper(id, updateObj);
-    render();
   });
 
-  // Logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem("loggedInUser");
     window.location.href = "index.html";
   });
 
-  // Adatok betöltése és első render
   await logic.loadDevelopers();
   render();
 });
 
-// <<< ESEMÉNYDELEGÁLÁS: minden kártyagomb itt kezelve, biztosan működik render után is
 document.getElementById("app").addEventListener("click", async (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
@@ -100,15 +99,21 @@ document.getElementById("app").addEventListener("click", async (e) => {
     document.getElementById("editName").value = dev.name || "";
     document.getElementById("editEmail").value = dev.email || "";
     document.getElementById("editJob").value = dev.job || "";
-    document.getElementById("editAge").value = Number.isFinite(dev.age) ? dev.age : "";
-    document.getElementById("editSalary").value = Number.isFinite(dev.salary) ? dev.salary : "";
+    document.getElementById("editAge").value = dev.age ?? "";
+    document.getElementById("editSalary").value = dev.salary ?? "";
     document.getElementById("editImage").value = dev.image || "";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   if (btn.classList.contains("delete-btn")) {
     const id = btn.dataset.id;
-    await logic.deleteDeveloper(id);
-    render();
+    if (confirm("Biztosan törölni szeretnéd ezt a rekordot?")) {
+        try {
+            await logic.deleteDeveloper(id);
+            render();
+        } catch (e) {
+            alert(e.message || "Hiba a törlés során.");
+        }
+    }
   }
 });

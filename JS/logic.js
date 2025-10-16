@@ -1,13 +1,10 @@
-// ======================= JS/logic.js =======================
 import APIHandler from "./apiHandler.js";
 import Developer from "./developer.js";
 
 function genUUID() {
-  // crypto.randomUUID, ha van
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  // Fallback UUID v4
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
     const r = (Math.random() * 16) | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
     return v.toString(16);
@@ -20,7 +17,7 @@ export default class Logic {
     this.filteredDevelopers = [];
     this.currentFilter = "";
     this.loggedUser = null;
-    this.showInvalid = false; // ID nélküli mutatása
+    this.showInvalid = false;
   }
 
   setLoggedUser(userObj) {
@@ -32,8 +29,7 @@ export default class Logic {
     if (!u) return "XX";
     const ln = (u.lastName || "").trim();
     const fn = (u.firstName || "").trim();
-    const initials =
-      (ln ? ln[0].toUpperCase() : "") + (fn ? fn[0].toUpperCase() : "");
+    const initials = (ln ? ln[0].toUpperCase() : "") + (fn ? fn[0].toUpperCase() : "");
     return initials || "XX";
   }
 
@@ -50,9 +46,8 @@ export default class Logic {
 
   applyFilter() {
     let arr = this.allDevelopers.slice();
-
     if (!this.showInvalid) {
-      arr = arr.filter(d => !!d.cid); // alapból rejtsük az üres ID-s rekordokat
+      arr = arr.filter(d => !!d.cid);
     }
     if (this.currentFilter) {
       arr = arr.filter(d => (d.job || "") === this.currentFilter);
@@ -71,67 +66,48 @@ export default class Logic {
     return this.applyFilter();
   }
 
-  // CREATE: kötelezően generálunk kliensoldali UUID-t
   async createDeveloperFromJSON(rawJson) {
     let obj;
     try {
       obj = JSON.parse(rawJson);
     } catch {
-      throw new Error("Hibás JSON");
+      throw new Error("Hibás JSON formátum!");
     }
 
-    // skills legyen tömb
     if (!Array.isArray(obj.skills)) obj.skills = [];
-
-    // prefix
+    
     const initials = this.getInitials();
     if (obj.name && !obj.name.startsWith(initials + "-")) {
       obj.name = `${initials}-${obj.name}`;
     }
 
-    // ha nincs/üres id, generálunk
     if (!obj.id || !obj.id.toString().trim()) {
       obj.id = genUUID();
     }
 
-    const resp = await APIHandler.createDeveloper(obj);
-
-    // Ha a backend visszaad teljes objektumot, azzal dolgozunk, különben a kliensoldali obj-t használjuk
-    let created = null;
-    if (resp && typeof resp === "object" && (resp.id || resp._id || resp.Id)) {
-      created = new Developer(resp);
-    } else if (resp && resp.data && (resp.data.id || resp.data._id || resp.data.Id)) {
-      created = new Developer(resp.data);
-    } else {
-      created = new Developer(obj);
-    }
-
-    // csak akkor tesszük be a listába, ha van érvényes ID
+    const newDevData = await APIHandler.createDeveloper(obj);
+    const created = new Developer(newDevData.data || obj);
+    
     if (created.cid) {
       this.allDevelopers.push(created);
     } else {
-      // ha bármilyen okból üres maradt, teljes újratöltés
       await this.loadDevelopers();
-      return this.filteredDevelopers;
     }
     return this.applyFilter();
   }
 
   async updateDeveloper(id, updateObj) {
     if (!id) {
-      alert("Nincs érvényes ID – ezt a rekordot nem lehet frissíteni.");
-      return this.applyFilter();
+      throw new Error("Nincs érvényes ID – ezt a rekordot nem lehet frissíteni.");
     }
 
-    const payload = {
-      id: id,
-      ...updateObj
-    };
+    const payload = { id: id, ...updateObj };
     await APIHandler.updateDeveloper(payload);
 
     const idx = this.allDevelopers.findIndex(d => d.cid == id);
     if (idx !== -1) {
-      this.allDevelopers[idx] = new Developer({ ...this.allDevelopers[idx], ...updateObj });
+      const updatedDev = new Developer({ ...this.allDevelopers[idx], ...updateObj });
+      this.allDevelopers[idx] = updatedDev;
     } else {
       await this.loadDevelopers();
     }
@@ -144,17 +120,14 @@ export default class Logic {
       return this.applyFilter();
     }
 
-    // Csak a saját (monogrammal kezdődő) rekordjaid törölhetők
     const initials = this.getInitials();
     const target = this.allDevelopers.find(d => d.cid == id);
-    const isMine = target && (target.name || "").startsWith(initials + "-");
-    if (!isMine) {
-      alert("Csak a saját (monogrammal jelölt) rekordjaid törölheted.");
+    if (!target || !target.name.startsWith(initials + "-")) {
+      alert("Csak a saját (monogrammal jelölt) rekordjaidat törölheted.");
       return this.applyFilter();
     }
 
     await APIHandler.deleteDeveloper(id);
-
     this.allDevelopers = this.allDevelopers.filter(d => d.cid != id);
     return this.applyFilter();
   }

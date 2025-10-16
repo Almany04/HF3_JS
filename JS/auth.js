@@ -1,4 +1,3 @@
-// ======================= JS/auth.js =======================
 function getUsers() {
   return JSON.parse(localStorage.getItem("users") || "[]");
 }
@@ -55,6 +54,7 @@ function register() {
 
   alert("Sikeres regisztráció! Most jelentkezz be.");
   document.getElementById("loginUsername").value = un;
+  document.getElementById("loginPassword").focus();
 }
 
 function login() {
@@ -70,16 +70,14 @@ function login() {
     return;
   }
 
-  // bejelentkezés állapot
   localStorage.setItem("loggedInUser", JSON.stringify(found));
   window.location.href = "app.html";
 }
 
-// Event kötés
 document.addEventListener("DOMContentLoaded", () => {
   ["regLastName","regFirstName","regUsername","regPassword","regPassword2"]
-    .forEach(id => document.getElementById(id).addEventListener("input", validateRegForm));
+    .forEach(id => document.getElementById(id)?.addEventListener("input", validateRegForm));
 
-  document.getElementById("regBtn").addEventListener("click", register);
-  document.getElementById("loginBtn").addEventListener("click", login);
+  document.getElementById("regBtn")?.addEventListener("click", register);
+  document.getElementById("loginBtn")?.addEventListener("click", login);
 });
