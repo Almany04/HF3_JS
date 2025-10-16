@@ -1,4 +1,3 @@
-// ======================= JS/gdpr.js =======================
 function getConsent() {
   return localStorage.getItem("gdprConsent"); // "accepted" | "declined" | null
 }
