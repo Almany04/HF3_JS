@@ -1,5 +1,5 @@
 function getConsent() {
-  return localStorage.getItem("gdprConsent"); // "accepted" | "declined" | null
+  return localStorage.getItem("gdprConsent");
 }
 
 function setConsent(val) {
@@ -8,7 +8,7 @@ function setConsent(val) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const banner = document.getElementById("gdprBanner");
-  if (!banner) return; // index.html-en nincs banner
+  if (!banner) return;
 
   const accept = document.getElementById("gdprAccept");
   const decline = document.getElementById("gdprDecline");
